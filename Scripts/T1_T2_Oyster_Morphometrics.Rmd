@@ -1,0 +1,139 @@
+---
+title: "EVOS_Regional_Variation_T1_T2"
+author: "Becca Cates"
+date: "2025-05-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# library
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+```
+
+#read in data
+```{r}
+oyster <- read.csv("Data/EVOS Oyster morphometrics.csv")
+```
+
+#clean and prep data
+```{r}
+str(oyster)
+
+#create subset of data
+oyster <- dplyr::select(oyster, c("Sample_event", "Sample_date", "Region", "Farm", "Oyster_age", "Shell_height_mm", "Shell_length_mm", "Shell_depth_mm", "Whole_weight_g", "Meat_weight_g"))
+
+#change str of data
+oyster$Sample_date <- as.Date(oyster$Sample_date, "%m/%d/%Y")
+oyster$Meat_weight_g <- as.numeric(oyster$Meat_weight_g)
+oyster$Whole_weight_g <- as.numeric(oyster$Whole_weight_g)
+oyster$Shell_depth_mm <- as.numeric(oyster$Shell_depth_mm)
+oyster$Shell_length_mm <- as.numeric(oyster$Shell_length_mm)
+oyster$Sample_event <- as.factor(oyster$Sample_event)
+
+#Create cup ratio column
+oyster$cup_ratio <- 1
+oyster$cup_ratio <- as.numeric(oyster$cup_ratio)
+oyster$cup_ratio <- as.numeric(oyster$Shell_depth_mm)/as.numeric(oyster$Shell_height_mm)
+
+#create subadult adn juvenile dfs
+subadult <- filter(oyster, Oyster_age == "Subadult")
+juvenile <- filter(oyster, Oyster_age == "Juvenile")
+```
+
+#######################Subadults
+
+#Boxplot: Subadult meat weight (g) by farm and sample event  
+```{r}
+ggplot(subadult, aes(x=Farm, y=Meat_weight_g, fill= Sample_event)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
+#Boxplot: Subadult meat weight (g) by region and sample event
+```{r}
+ggplot(subadult, aes(x=Region, y=Meat_weight_g, fill= Sample_event)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
+#Boxplot: Subadult whole weight (g) by region and sample event
+```{r}
+ggplot(subadult, aes(x=Region, y=Whole_weight_g, fill= Sample_event)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
+#Boxplot: Subadult cup ratio by farm and sample event
+```{r}
+
+```
+
+#faceted boxplots
+```{r}
+# One box per treatment
+p1 <- ggplot(subadult, aes(x=Farm, y=Meat_weight_g, fill= Sample_event)) + 
+    geom_boxplot() +
+  theme_classic2() +
+    facet_wrap(~Sample_event)+
+  theme(strip.text = element_blank())
+p1
+# one box per variety
+p2 <- ggplot(subadult, aes(x=Farm, y=Meat_weight_g, fill=Sample_event)) + 
+    geom_boxplot() +
+    facet_wrap(~Farm, scale="free")+
+    theme_classic2() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+p2
+```
+
+#######################Juveniles
+
+#Boxplot: Juvenile meat weight (g) by farm and sample event  
+```{r}
+ggplot(juvenile, aes(x=Farm, y=Meat_weight_g, fill= Sample_event)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
+#Boxplot: Juvenile meat weight (g) by region and sample event
+```{r}
+ggplot(juvenile, aes(x=Region, y=Meat_weight_g, fill= Sample_event)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
+#Boxplot: Juvenile whole weight (g) by region and sample event
+```{r}
+ggplot(juvenile, aes(x=Region, y=Whole_weight_g, fill= Sample_event)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
+#faceted boxplots
+```{r}
+# One box per treatment
+p1 <- ggplot(juvenile, aes(x=Farm, y=Meat_weight_g, fill= Sample_event)) + 
+    geom_boxplot() +
+  theme_classic2() +
+    facet_wrap(~Sample_event)+
+  theme(strip.text = element_blank())
+p1
+# one box per variety
+p2 <- ggplot(juvenile, aes(x=Farm, y=Meat_weight_g, fill=Sample_event)) + 
+    geom_boxplot() +
+    facet_wrap(~Farm, scale="free")+
+    theme_classic2() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+p2
+```
+
