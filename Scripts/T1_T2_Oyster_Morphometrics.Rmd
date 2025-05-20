@@ -53,6 +53,10 @@ juvenile <- filter(oyster, Oyster_age == "Juvenile")
 ggplot(subadult, aes(x=Farm, y=Meat_weight_g, fill= Sample_event)) + 
   geom_boxplot() +
   theme_classic2()
+
+sub_meat <- aov(formula = Meat_weight_g ~ Region + Sample_event, data = subadult)
+summary(sub_meat)
+TukeyHSD(sub_meat)
 ```
 
 #Boxplot: Subadult meat weight (g) by region and sample event
@@ -71,7 +75,9 @@ ggplot(subadult, aes(x=Region, y=Whole_weight_g, fill= Sample_event)) +
 
 #Boxplot: Subadult cup ratio by farm and sample event
 ```{r}
-
+ggplot(subadult, aes(x=Region, y=cup_ratio, fill= Sample_event)) + 
+  geom_boxplot() +
+  theme_classic2()
 ```
 
 #faceted boxplots
