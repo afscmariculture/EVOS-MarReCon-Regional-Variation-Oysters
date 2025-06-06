@@ -1,0 +1,78 @@
+---
+title: "T0_T2_Wet Meat Weights"
+author: "Becca Cates"
+date: "2025-06-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# library
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+```
+
+#read in data
+```{r}
+T0 <- read.csv("Data/EVOS_TimeZero_SubAdults_May2024.csv")
+T2 <- read.csv("Data/EVOS Oyster morphometrics.csv")
+```
+
+#clean and prep data - T0
+```{r}
+#T0
+str(T0)
+
+#create subset of data
+T0 <- dplyr::select(T0, c(2,5))
+
+#rename
+T0 <- T0 %>% 
+  rename(Wet__meat_weight_g = Wet.meat.weight..g.) %>% 
+  rename(Age_TimeZero = Age)
+
+#Remove rows with NAs
+T0 <- T0[-c(54:103), ]
+
+```
+
+#T2
+```{r}
+str(T2)
+
+#create subset of data
+T2 <- dplyr::select(T2, c("Sample_event", "Sample_date", "Region", "Farm", "Oyster_age", "Meat_weight_g"))
+
+#change str of data
+T2$Sample_date <- as.Date(T2$Sample_date, "%m/%d/%Y")
+T2$Meat_weight_g <- as.numeric(T2$Meat_weight_g)
+T2$Sample_event <- as.factor(T2$Sample_event)
+T2$Oyster_age <- as.factor(T2$Oyster_age)
+
+T2 <- T2 %>% 
+  rename(Age_Time2 = Oyster_age)
+
+#create juvenile df from T2
+T2juve <- filter(T2, Age_Time2 == "Juvenile")
+T2juvenile <- filter(T2juve, Sample_event == 2 )
+
+```
+
+#Time zero subadults
+```{r}
+ggplot(T0, aes(x=Age_TimeZero, y = Wet__meat_weight_g)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
+Time 2 juveniles
+```{r}
+ggplot(T2juvenile, aes(x=Age_Time2, y = Meat_weight_g)) + 
+  geom_boxplot() +
+  theme_classic2()
+```
+
