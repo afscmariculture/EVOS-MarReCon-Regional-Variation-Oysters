@@ -1,0 +1,124 @@
+---
+title: "Height_Length_Weight_Correlation"
+author: "Becca Cates"
+date: "2025-06-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# library
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+```
+
+#read in data
+```{r}
+oyster <- read.csv("Data/EVOS Oyster morphometrics.csv")
+```
+
+#clean and prep data
+```{r}
+str(oyster)
+
+#create subset of data
+oyster <- dplyr::select(oyster, c("Sample_event", "Sample_date", "Region", "Farm", "Oyster_age", "Shell_height_mm", "Shell_length_mm", "Shell_depth_mm", "Whole_weight_g", "Meat_weight_g"))
+
+#change str of data
+oyster$Sample_date <- as.Date(oyster$Sample_date, "%m/%d/%Y")
+oyster$Meat_weight_g <- as.numeric(oyster$Meat_weight_g)
+oyster$Whole_weight_g <- as.numeric(oyster$Whole_weight_g)
+oyster$Shell_depth_mm <- as.numeric(oyster$Shell_depth_mm)
+oyster$Shell_length_mm <- as.numeric(oyster$Shell_length_mm)
+oyster$Sample_event <- as.factor(oyster$Sample_event)
+oyster$Shell_height_mm <- as.numeric (oyster$Shell_height_mm)
+
+#create subadult and juvenile dfs
+subadult <- dplyr::filter(oyster, Oyster_age == "Subadult")
+juvenile <- dplyr::filter(oyster, Oyster_age == "Juvenile")
+```
+
+#Subadult correlations (Height, weight, length, cup ratio, whole weight, meat weight)
+```{r}
+ggscatter(subadult, x = "Shell_height_mm", y = "Shell_length_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Shell Height (mm)", ylab = "Shell Length (mm)")
+#R=0.69
+
+ggscatter(subadult, x = "Shell_height_mm", y = "Shell_depth_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Shell Height (mm)", ylab = "Shell depth (mm)")
+#R=0.49
+
+ggscatter(subadult, x = "Shell_length_mm", y = "Shell_depth_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Shell length (mm)", ylab = "Shell depth (mm)")
+#R=0.56
+
+ggscatter(subadult, x = "Whole_weight_g", y = "Meat_weight_g", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Whole weight (g)", ylab = "Meat weight (g)")
+#R=0.87
+
+ggscatter(subadult, x = "Whole_weight_g", y = "Shell_height_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Whole weight (g)", ylab = "Shell height (mm)")
+#R=0.85
+
+#corrgram
+library(corrgram)
+corrgram(subadult, order=TRUE, lower.panel=panel.shade,
+  upper.panel=panel.pie, text.panel=panel.txt,
+  main="Subadult oyster")
+
+```
+
+#Juvenile correlations
+```{r}
+ggscatter(juvenile, x = "Shell_height_mm", y = "Shell_length_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Shell Height (mm)", ylab = "Shell Length (mm)")
+#R=0.79
+
+ggscatter(juvenile, x = "Shell_height_mm", y = "Shell_depth_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Shell Height (mm)", ylab = "Shell depth (mm)")
+#R=0.71
+
+ggscatter(juvenile, x = "Shell_length_mm", y = "Shell_depth_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Shell length (mm)", ylab = "Shell depth (mm)")
+#R=0.64
+
+ggscatter(juvenile, x = "Whole_weight_g", y = "Meat_weight_g", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Whole weight (g)", ylab = "Meat weight (g)")
+#R=0.87
+
+ggscatter(juvenile, x = "Whole_weight_g", y = "Shell_height_mm", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Whole weight (g)", ylab = "Shell height (mm)")
+#R=0.86
+
+#Corrgram
+library(corrgram)
+corrgram(juvenile, order=TRUE, lower.panel=panel.shade,
+  upper.panel=panel.pie, text.panel=panel.txt,
+  main="Juvenile oyster")
+```
+
