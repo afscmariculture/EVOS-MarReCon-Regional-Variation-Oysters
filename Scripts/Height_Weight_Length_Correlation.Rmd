@@ -92,7 +92,7 @@ corrgram(subadult, order=TRUE, lower.panel=panel.shade,
 
 # Juvenile correlations
 
-```{r}
+```{, recho=FALSE, warning=FALSE, message=FALSE}
 ggscatter(juvenile, x = "Shell_height_mm", y = "Shell_length_mm", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
