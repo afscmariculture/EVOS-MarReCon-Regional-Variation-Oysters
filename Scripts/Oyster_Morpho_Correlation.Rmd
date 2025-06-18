@@ -1,10 +1,10 @@
 ---
-title: "Height_Length_Weight_Correlation"
+title: "Oyster_Morpho_Correlation"
 author: "Becca Cates"
 date: "2025-06-16"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -51,7 +51,7 @@ juvenile <- dplyr::filter(oyster, Oyster_age == "Juvenile")
 
 #### **(Height, weight, length, cup ratio, whole weight, meat weight)**
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggscatter(subadult, x = "Shell_height_mm", y = "Shell_length_mm", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
@@ -92,7 +92,7 @@ corrgram(subadult, order=TRUE, lower.panel=panel.shade,
 
 # Juvenile correlations
 
-```{, recho=FALSE, warning=FALSE, message=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ggscatter(juvenile, x = "Shell_height_mm", y = "Shell_length_mm", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
