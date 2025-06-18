@@ -2,28 +2,32 @@
 title: "Height_Length_Weight_Correlation"
 author: "Becca Cates"
 date: "2025-06-16"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(include = TRUE)
 ```
 
+# Library
 
-# library
-```{r}
+```{r, include=FALSE}
 library(ggplot2)
 library(tidyverse)
 library(ggpubr)
 ```
 
-#read in data
-```{r}
-oyster <- read.csv("Data/EVOS Oyster morphometrics.csv")
+# Read in data
+
+```{r, include=FALSE}
+oyster <- read.csv("../Data/EVOS Oyster morphometrics.csv")
 ```
 
-#clean and prep data
-```{r}
+# Clean and prep data
+
+```{r, include=FALSE}
 str(oyster)
 
 #create subset of data
@@ -43,8 +47,11 @@ subadult <- dplyr::filter(oyster, Oyster_age == "Subadult")
 juvenile <- dplyr::filter(oyster, Oyster_age == "Juvenile")
 ```
 
-#Subadult correlations (Height, weight, length, cup ratio, whole weight, meat weight)
-```{r}
+# Subadult correlations
+
+#### **(Height, weight, length, cup ratio, whole weight, meat weight)**
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 ggscatter(subadult, x = "Shell_height_mm", y = "Shell_length_mm", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
@@ -83,7 +90,8 @@ corrgram(subadult, order=TRUE, lower.panel=panel.shade,
 
 ```
 
-#Juvenile correlations
+# Juvenile correlations
+
 ```{r}
 ggscatter(juvenile, x = "Shell_height_mm", y = "Shell_length_mm", 
           add = "reg.line", conf.int = TRUE, 
@@ -122,3 +130,32 @@ corrgram(juvenile, order=TRUE, lower.panel=panel.shade,
   main="Juvenile oyster")
 ```
 
+```{r, include = FALSE}
+# A function for captioning and referencing images
+fig <- local({
+    i <- 0
+    ref <- list()
+    list(
+        cap=function(refName, text) {
+            i <<- i + 1
+            ref[[refName]] <<- i
+            paste("Figure ", i, ": ", text, sep="")
+        },
+        ref=function(refName) {
+            ref[[refName]]
+        })
+})
+
+# Creates custom base plot theme that can adjust every graph that you use plot_theme for!
+
+plot_theme <- function() {
+  theme_bw(base_size = 14, base_family = "Avenir") %+replace%
+    theme(panel.background  = element_blank(),
+            plot.background = element_rect(fill="gray96", colour=NA), 
+            legend.background = element_rect(fill="transparent", colour=NA),
+            legend.key = element_rect(fill="transparent", colour=NA),
+            panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            strip.background = element_rect(colour = "NA", fill = "gray96"))
+}
+```
