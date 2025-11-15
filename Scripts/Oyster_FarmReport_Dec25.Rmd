@@ -1,0 +1,163 @@
+---
+title: "EVOS Oysters - Farm Report"
+author: "AOF1"
+date: "2025-11-14"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, out.width = "1000px")
+```
+
+
+```{r, include=FALSE}
+#Read in data
+oysters <- read.csv("../Data/EVOS oyster morphometrics.csv")
+T0 <- read.csv("../Data/5_31_24_EVOS_TimeZero_OysterData_seed.csv")
+
+```
+
+
+```{r, include=FALSE}
+#load libraries
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+library(lme4)
+library(Rmisc)
+```
+
+
+```{r, include=FALSE}
+#data prep
+#Change levels of data
+oysters$Meat_weight_g <- as.numeric(oysters$Meat_weight_g)
+oysters$Whole_weight_g <- as.numeric(oysters$Whole_weight_g)
+oysters$Shell_depth_mm <- as.numeric(oysters$Shell_depth_mm) 
+oysters$Shell_height_mm <- as.numeric(oysters$Shell_height_mm)
+oysters$cup_ratio <- oysters$Shell_depth_mm/oysters$Shell_height_mm
+oysters$Sample.Event <- as.character(oysters$Sample.Event)
+oysters$Sample_Event <- ifelse(oysters$Sample.Event=="0", "Summer2024",
+                             ifelse(oysters$Sample.Event=="1", "Fall2024", 
+                                    ifelse(oysters$Sample.Event=="2", "Spring2025", 
+                                           ifelse(oysters$Sample.Event=="3", "Summer2025", "Fall2025"))))
+
+oysters$Sample_Event <- factor(oysters$Sample_Event, levels = c("Summer2024", "Fall2024", "Spring2025", "Summer2025", "Fall2025"))
+
+
+oysters$Farm  = factor(oysters$Farm, levels=c("T0", "AOF1","KIS1","KOB1",
+                                    "BCF1","MIO1","SSF1",
+                                    "ROK1","SBO1","SBR1"))
+#recode farm names
+oysters$Site = ifelse(oysters$Farm=="T0", "Initial",
+                   ifelse(oysters$Farm=="AOF1", "Kodiak1",
+                 ifelse(oysters$Farm=="KIS1", "Kodiak2",
+                        ifelse(oysters$Farm=="KOB1", "Kodiak3",
+                               ifelse(oysters$Farm=="BCF1", "KBay1",
+                                      ifelse(oysters$Farm=="MIO1", "KBay2",
+                                             ifelse(oysters$Farm=="SSF1","KBay3",
+                                                    ifelse(oysters$Farm=="ROK1","PWS1",
+                                                           ifelse(oysters$Farm=="SBO1","PWS2",
+                                                                  "PWS3")))))))))
+#subset juvenile and subadults
+sub <- subset(oysters, Oyster_age=="Subadult")
+juv <- subset(oysters, Oyster_age=="Juvenile")
+```
+
+# **All Farms**
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(juv, aes(x=Farm, y=Shell_height_mm, fill=Sample_Event))+
+  geom_boxplot(position=position_dodge(0.85))+
+  theme_bw(base_size = 10)+
+  labs(fill = "Sampling Event", y = "Shell Height (mm)")+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "top")
+
+ggplot(juv, aes(x=Farm, y=Meat_weight_g, fill=Sample_Event))+
+  geom_boxplot(position=position_dodge(0.85))+
+  theme_bw(base_size = 10)+
+  labs(fill = "Sampling Event", y = "Meat Weight (g)")+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "none")
+
+
+ggplot(juv, aes(x=Farm, y=cup_ratio, fill=Sample_Event))+
+  geom_boxplot(position=position_dodge(0.85))+
+  theme_bw(base_size = 10)+
+  labs(fill = "Sampling Event", y = "Cup Ratio")+
+  coord_cartesian(ylim =  c(0, 1))+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "none")
+
+```
+
+# **AOF1**
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#define farm
+farm = "AOF1"
+
+#shell height
+ggplot(juv, aes(x=farm, y=Shell_height_mm, fill=Sample_Event))+
+  geom_boxplot()+
+  theme_bw(base_size=10)+
+  labs(fill = "Sampling Event", y = "Shell Height (mm)")+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "top", axis.text.x=element_blank(), axis.title.x=element_blank())  
+#Meat weight
+ggplot(juv, aes(x=farm, y=Meat_weight_g, fill=Sample_Event))+
+  geom_boxplot()+
+  theme_bw(base_size=10)+
+  labs(fill = "Sampling Event", y = "Meat Weight (g)")+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "none", axis.text.x=element_blank(), axis.title.x=element_blank())  
+#cup ratio
+ggplot(juv, aes(x=farm, y=cup_ratio, fill=Sample_Event))+
+  geom_boxplot()+
+  coord_cartesian(ylim =  c(0, 1))+
+  theme_bw(base_size=10)+
+  labs(fill = "Sampling Event", y = "Cup Ratio")+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "none", axis.text.x=element_blank(), axis.title.x=element_blank())
+
+```
+
+```{r, include=FALSE}
+
+# dont need to run but a cool for loop 
+
+# if you want to create a for loop that loops through a list of Farms 
+
+#farm <- "AOF1"
+
+
+#for(farm in unique(juv$Farm)) { # for every "farm" in the list of unique "Farms" in dataframe juv
+ # sub.dat <- filter(juv, Farm == farm) # filter data to the unique "farm" 
+  # here you can add any other filters or subsetting for the figure
+  
+  # get date from computer system to add to filename
+  #date <- Sys.Date()
+  
+  # create the plot and name it. I removed the subset here because we filtered the data to just a single farm above
+#  plot <- ggplot(data = sub.dat)+
+ #   geom_boxplot(aes(x=Sample.Event, y=Meat_weight_g))+
+  #  theme_bw()
+    
+  
+  # here's the ggsave to print out each plot, I added the paste to the filename to add in the farm name (from the dataframe)
+  # and the date. You'll have to add in location. 
+  #ggsave(plot = plot, 
+   #      path = "Reports/", 
+    #     filename = paste(farm, date, "meat_weight_plot.png", sep = "_"),
+     #    height = 8, width = 12)  
+
+  #print(farm)
+#}
+```
+
+
