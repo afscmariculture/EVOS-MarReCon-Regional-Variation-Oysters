@@ -1,7 +1,7 @@
 ---
 title: "EVOS Oysters - Farm Report"
 author: "AOF1"
-date: "2025-11-14"
+date: December 2025
 output:
   html_document: default
   word_document: default
@@ -15,8 +15,8 @@ knitr::opts_chunk$set(echo = TRUE, out.width = "1000px")
 
 ```{r, include=FALSE}
 #Read in data
-oysters <- read.csv("../Data/EVOS oyster morphometrics.csv")
-T0 <- read.csv("../Data/5_31_24_EVOS_TimeZero_OysterData_seed.csv")
+oysters <- read.csv("Data/EVOS oyster morphometrics.csv")
+T0 <- read.csv("Data/5_31_24_EVOS_TimeZero_OysterData_seed.csv")
 
 ```
 
@@ -67,7 +67,7 @@ sub <- subset(oysters, Oyster_age=="Subadult")
 juv <- subset(oysters, Oyster_age=="Juvenile")
 ```
 
-# **All Farms**
+# **By Farms**
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -91,6 +91,36 @@ ggplot(juv, aes(x=Farm, y=cup_ratio, fill=Sample_Event))+
   theme_bw(base_size = 10)+
   labs(fill = "Sampling Event", y = "Cup Ratio")+
   coord_cartesian(ylim =  c(0, 1))+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "none")
+
+
+```
+#Cup ratio = shell depth (mm) / shell height (mm)
+
+# **By Region**
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+#shell height
+ggplot(juv, aes(x=Region, y=Shell_height_mm, fill=Sample_Event))+
+  geom_boxplot()+
+  theme_bw(base_size=10)+
+  labs(fill = "Sampling Event", y = "Shell Height (mm)")+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "top")  
+#Meat weight
+ggplot(juv, aes(x=Region, y=Meat_weight_g, fill=Sample_Event))+
+  geom_boxplot()+
+  theme_bw(base_size=10)+
+  labs(fill = "Sampling Event", y = "Meat Weight (g)")+
+  scale_fill_brewer(palette = "Set2")+
+  theme(legend.position = "none")  
+#cup ratio
+ggplot(juv, aes(x=Region, y=cup_ratio, fill=Sample_Event))+
+  geom_boxplot()+
+  coord_cartesian(ylim =  c(0, 1))+
+  theme_bw(base_size=10)+
+  labs(fill = "Sampling Event", y = "Cup Ratio")+
   scale_fill_brewer(palette = "Set2")+
   theme(legend.position = "none")
 
