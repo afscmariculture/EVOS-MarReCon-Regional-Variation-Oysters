@@ -1,15 +1,15 @@
 ---
-title: "EVOS Oysters - Farm Report"
+title: "EVOS Oyster Morphometrics - Farm Report"
 author: "AOF1"
 date: December 2025
 output:
-  word_document: default
-  pdf_document: default
   html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, out.width = "1000px")
+knitr::opts_chunk$set(echo = TRUE, out.width = "800px")
 ```
 
 
@@ -67,9 +67,8 @@ oysters$Site = ifelse(oysters$Farm=="T0", "Initial",
 sub <- subset(oysters, Oyster_age=="Subadult")
 juv <- subset(oysters, Oyster_age=="Juvenile")
 ```
-
-# **By Farms**
-
+### **By Farm**  
+Most farms saw increases in average shell height from summer 2025 to fall 2025. All farms saw increases in average meat weight from summer 2025 to fall 2025. Cup ratio is calculated by dividing shell depth by shell height. A higher value is a thicker oyster relative to height. Although there are no universally accepted thresholds for shell shapes, the generally accepted shell quality threshold is 0.25 for cup ratio (Brake et al., 2003; Mizuta and Wikfors, 2019). The range of cup ratios across farms at the fall 2025 sample event was 0.28 to 0.35. 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 ggplot(juv, aes(x=Farm, y=Shell_height_mm, fill=Sample_Event))+
@@ -97,9 +96,13 @@ ggplot(juv, aes(x=Farm, y=cup_ratio, fill=Sample_Event))+
 
 
 ```
-#Cup ratio = shell depth (mm) / shell height (mm)
+\pagebreak
+```{r, include=FALSE}
 
-# **By Region**
+```
+  
+### **By Region**  
+All regions saw increases in average shell height from summer 2025 to fall 2025. Average shell height in fall 2025 was 73.04 mm in KBY, 60.03 mm in Kodiak, and 71.85 mm in PWS. All regions saw increases in average meat weight from summer 2025 to fall 2025. Average meat weight in fall 2025 was 4.79 in KBY, 5.59 in Kodiak, and 6.63 in PWS. Average cup ratio in fall 2025 was 0.30 for Kachemak Bay, 0.34 for Kodiak, and 0.30 for PWS.  
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 #shell height
@@ -126,15 +129,17 @@ ggplot(juv, aes(x=Region, y=cup_ratio, fill=Sample_Event))+
   theme(legend.position = "none")
 
 ```
-
-# **AOF1**
-
+  
+### **AOF1**
+Average shell height (mm) in fall 2025 was 65.60 and average meat weight (g) was 7.34. Average cup ratio in fall 2025 was 0.3348851. 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 #define farm
 farm = "AOF1"
 
 #shell height
-ggplot(juv, aes(x=farm, y=Shell_height_mm, fill=Sample_Event))+
+juv %>% 
+  filter(Farm == farm) %>% 
+  ggplot(aes(x=farm, y=Shell_height_mm, fill=Sample_Event))+
   geom_boxplot()+
   theme_bw(base_size=10)+
   labs(fill = "Sampling Event", y = "Shell Height (mm)")+
@@ -155,6 +160,37 @@ ggplot(juv, aes(x=farm, y=cup_ratio, fill=Sample_Event))+
   labs(fill = "Sampling Event", y = "Cup Ratio")+
   scale_fill_brewer(palette = "Set2")+
   theme(legend.position = "none", axis.text.x=element_blank(), axis.title.x=element_blank())
+
+```
+
+
+```{r, include =FALSE}
+
+#find mean points scored by team 
+
+c1 <- juv %>% 
+  group_by(Sample.Event, Region) %>% 
+  summarise_at(vars(Shell_height_mm), list(name = mean))
+
+c2 <- juv %>% 
+  group_by(Sample.Event, Region) %>% 
+  summarise_at(vars(Meat_weight_g), list(name = mean))
+
+c3 <- juv %>% 
+  group_by(Sample.Event, Region) %>% 
+  summarise_at(vars(cup_ratio), list(name = mean))
+
+c4 <- juv %>% 
+  group_by(Sample.Event, Farm) %>% 
+  summarise_at(vars(Shell_height_mm), list(name = mean))
+
+c5 <- juv %>% 
+  group_by(Sample.Event, Farm) %>% 
+  summarise_at(vars(Meat_weight_g), list(name = mean))
+
+c6 <- juv %>% 
+  group_by(Sample.Event, Farm) %>% 
+  summarise_at(vars(cup_ratio), list(name = mean))
 
 ```
 
