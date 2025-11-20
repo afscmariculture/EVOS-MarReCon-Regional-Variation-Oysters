@@ -3,9 +3,9 @@ title: "EVOS Oysters - Farm Report"
 author: "AOF1"
 date: December 2025
 output:
-  html_document: default
   word_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -28,6 +28,7 @@ library(tidyverse)
 library(ggpubr)
 library(lme4)
 library(Rmisc)
+library(tinytex)
 ```
 
 
