@@ -1,0 +1,154 @@
+---
+title: "PAR_Regional_Variation"
+author: "Becca Cates"
+date: "2026-01-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# currently there are two datasets, one is a "historic" or "science quality" dataset that goes through September 2022, and the other is a NRT "real time" dataset which has more recent data. NRT is not up to date as they QA/QC data before making publicly available. Looks it is available through beginning of 2024.
+
+```{r}
+install.packages("sf")
+install.packages("ggspatial")
+install.packages("geosphere")
+install.packages("data.table")
+install.packages("prettymapr")
+install.packages("raster")
+
+require(sf)
+require(tidyverse)
+require(ggspatial)
+require(geosphere)
+require(data.table)
+```
+
+#Farm info + setup
+```{r}
+# site coords from proposal
+
+SBOlat <- 60.65912
+SBOlon <- -145.88357
+ROKlat <- 60.56503
+ROKlon <- -145.9696
+SBRlat <- 60.6343
+SBRlon <- -145.99634
+SSFlat <- 59.460476
+SSFlon <- -151.51823
+MIOlat <- 59.5702
+MIOlon <- -151.2695
+BCFlat <- 59.46815
+BCFlon <- -151.5175
+KOBlat <- 57.53253
+KOBlon <- -154.0354
+KISlat <- 57.76642
+KISlon <- -152.4116
+AOFlat <- 57.65823
+AOFlon <- -152.4205
+
+#Add in Margo's farm because she was interested in it at EVOS meeting?
+
+
+SBO <- st_as_sf(data.frame(lat = SBOlat, lon = SBOlon), coords = c("lon", "lat"), crs = "epsg:4326")
+ROK <- st_as_sf(data.frame(lat = ROKlat, lon = ROKlon), coords = c("lon", "lat"), crs = "epsg:4326")
+SBR <- st_as_sf(data.frame(lat = SBRlat, lon = SBRlon), coords = c("lon", "lat"), crs = "epsg:4326")
+SSF <- st_as_sf(data.frame(lat = SSFlat, lon = SSFlon), coords = c("lon", "lat"), crs = "epsg:4326")
+MIO <- st_as_sf(data.frame(lat = MIOlat, lon = MIOlon), coords = c("lon", "lat"), crs = "epsg:4326")
+BCF <- st_as_sf(data.frame(lat = BCFlat, lon = BCFlon), coords = c("lon", "lat"), crs = "epsg:4326")
+KOB <- st_as_sf(data.frame(lat = KOBlat, lon = KOBlon), coords = c("lon", "lat"), crs = "epsg:4326")
+KIS <- st_as_sf(data.frame(lat = KISlat, lon = KISlon), coords = c("lon", "lat"), crs = "epsg:4326")
+AOF <- st_as_sf(data.frame(lat = AOFlat, lon = AOFlon), coords = c("lon", "lat"), crs = "epsg:4326")
+
+# map service 
+
+esri_ocean <- paste0('https://services.arcgisonline.com/arcgis/rest/services/',
+                     'Ocean/World_Ocean_Base/MapServer/tile/${z}/${y}/${x}.jpeg')
+
+```
+
+#Bounding Box - AOF
+```{r}
+# helper function for creating bounding box
+getsquare <- function(x) {
+  # d = distance in meters, here using 15km
+    as.data.frame(destPoint(c(AOFlon, AOFlat), b = x, d = 20000)) #need to recode for farm here
+}
+
+# bound box 
+bbox <- st_bbox(st_as_sf(map_df(c(45,135,225,315), getsquare), coords = c("lon", "lat"), crs = "epsg:4326"))
+
+bboxRect <- st_as_sfc(bbox)
+
+mapfig <- ggplot(data = bboxRect) +
+  geom_sf(fill = NA) +
+  annotation_map_tile(type = esri_ocean, zoom = 12) +
+  geom_sf(data = bboxRect, fill = "grey20", alpha = 0.2) +
+  geom_sf(data = AOF) ####need to recode for farm here
+
+mapfig
+#ggsave("figures/map.png", mapfig)
+
+#### SQ data (2002-2023) ####
+
+base_url <- "https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdMH1par08day.csvp?par%5B(2003-01-05T00:00:00Z):1:(2022-06-14T00:00:00Z)%5D%5B(MAXLAT):1:(MINLAT)%5D%5B(MINLON):1:(MAXLON)%5D"
+
+url <- str_replace(base_url,pattern = "MINLAT", as.character(round(bbox$ymin, 5))) |>
+  str_replace(pattern = "MAXLAT", as.character(round(bbox$ymax, 5))) |>
+  str_replace(pattern = "MAXLON", as.character(round(bbox$xmax, 5))) |>
+  str_replace(pattern = "MINLON", as.character(round(bbox$xmin, 5))) 
+
+pardata <- data.table::fread(url)
+
+colnames(pardata) <- c("datetime", "latitude", "longitude", "par")
+
+historic <- pardata |>
+  mutate(date = as.Date(datetime)) |>
+  group_by(date) |>
+  summarise(par = mean(par, na.rm=TRUE)) |>
+  mutate(source = "sq")
+
+
+#### RT data (2002-2024) ####
+
+base_url_rt <- "https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdMH1par08day_R2022NRT.csvp?par%5B(2022-03-02):1:(2024-01-29T00:00:00Z)%5D%5B(MAXLAT):1:(MINLAT)%5D%5B(MINLON):1:(MAXLON)%5D"
+
+url_rt <- str_replace(base_url_rt,pattern = "MINLAT", as.character(round(bbox$ymin, 5))) |>
+  str_replace(pattern = "MAXLAT", as.character(round(bbox$ymax, 5))) |>
+  str_replace(pattern = "MAXLON", as.character(round(bbox$xmax, 5))) |>
+  str_replace(pattern = "MINLON", as.character(round(bbox$xmin, 5))) 
+
+pardatart <- data.table::fread(url_rt)
+
+write.csv(pardata, "Data/pardata.csv")
+
+colnames(pardatart) <- c("datetime", "latitude", "longitude", "par")
+
+realtime <- pardatart |>
+  mutate(date = as.Date(datetime)) |>
+  group_by(date) |>
+  summarise(par = mean(par, na.rm=TRUE)) |>
+  mutate(source = "rt")
+
+# combined
+
+alldata <- rbind(historic, realtime)
+
+parfig <- alldata |>
+  filter(date > as.Date("2020-01-01")) |> ###can adjust start date here
+  ggplot(aes(x = date, y = par, color = source)) +
+  geom_line() +
+  theme_classic() +
+  labs(x = "", y = "PAR (einstein m-2 day-1)")
+
+parfig
+
+#ggsave("figures/par.png", parfig)
+```
+
+##### Copy and paste above code and recode for each farm site or create loop to apply to all farms
+ 
+ 
+ 
